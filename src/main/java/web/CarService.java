@@ -2,8 +2,10 @@ package web;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -15,8 +17,23 @@ public class CarService {
         List<CarEntity> entityList = carRepository.findAll();
         List<CarDto> dtoList = entityList.stream()
                 .map( CarEntity :: toDto ).toList();
+        // 전체조회 확인
         System.out.println("dtoList ="+ dtoList.size());
-
+        // **FastAPI(파이썬)에게 자료 보내고 학습하기 **
+        WebClient webClient = WebClient.create();
+        Object object = webClient.post() // post method
+                .uri("http://localhost:8000/api/model/learn") //파이썬 주소
+                .bodyValue( dtoList ) // JPA에서 꺼내온 DTO 보낸다.<파이썬에게 보낼 자료 >
+                .retrieve() // 응답(반환) 받기
+                .bodyToMono(Object.class) // 응답자료 타입 // 타입명.class
+                .block(); // 동기화
         return true;
+    }
+
+    // [2] 예측 요청
+    public Object 예측요청( CarDto carDto ){
+        System.out.println("carDto = "+ carDto);
+        // ** FastAPI(파이썬)에게 자료 보내고 예측 받아오기 **
+        return 10000;
     }
 }
